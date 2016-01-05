@@ -19,25 +19,7 @@ namespace BankAccount.QueryStackDal
 
         public DetailsBankAccountViewModel GetCustomerById(Guid aggregateId)
         {
-            var obj = new Domain.CustomerDomainModel();
-
-            IEnumerable<Commit> commits;
-
-            var latestSnapshot = this._eventStore.Advanced.GetSnapshot(aggregateId, int.MaxValue);
-            if (latestSnapshot?.Payload != null)
-            {
-                obj = (Domain.CustomerDomainModel)Convert.ChangeType(latestSnapshot.Payload, latestSnapshot.Payload.GetType());
-                commits = this._eventStore.Advanced.GetFrom(aggregateId, latestSnapshot.StreamRevision + 1, int.MaxValue).ToList();
-            }
-            else
-            {
-                commits = this._eventStore.Advanced.GetFrom(aggregateId, 0, int.MaxValue).ToList();
-            }
-
-            foreach (var c in commits)
-            {
-                obj.LoadsFromHistory(c.Events);
-            }
+            var obj = this.RehydrateDomainModel(aggregateId);
 
             return new DetailsBankAccountViewModel
             {
@@ -100,15 +82,47 @@ namespace BankAccount.QueryStackDal
 
         public IEnumerable<BankAccountViewModel> GetCustomers()
         {
+            List<Guid> aggregates;
+
             using (var ctx = new BankAccountDbContext())
             {
-                return ctx.CustomerSet.Select(e => new BankAccountViewModel
-                {
-                    Id                  = e.AggregateId,
-                    FirstName           = e.FirstName,
-                    LastName            = e.LastName
-                }).ToList();
+                aggregates = ctx.CustomerSet.Select(c => c.AggregateId).ToList();
             }
+
+            return aggregates
+                .Select(this.RehydrateDomainModel)
+                .Select(customer =>
+                    new BankAccountViewModel
+                    {
+                        FirstName = customer.Person.FirstName,
+                        LastName = customer.Person.LastName,
+                        Id = customer.Id
+                    })
+                .ToList();
+        }
+
+        private Domain.CustomerDomainModel RehydrateDomainModel(Guid aggregateId)
+        {
+            var obj = new Domain.CustomerDomainModel();
+            IEnumerable<Commit> commits;
+
+            var latestSnapshot = this._eventStore.Advanced.GetSnapshot(aggregateId, int.MaxValue);
+            if (latestSnapshot?.Payload != null)
+            {
+                obj = (Domain.CustomerDomainModel)Convert.ChangeType(latestSnapshot.Payload, latestSnapshot.Payload.GetType());
+                commits = this._eventStore.Advanced.GetFrom(aggregateId, latestSnapshot.StreamRevision + 1, int.MaxValue).ToList();
+            }
+            else
+            {
+                commits = this._eventStore.Advanced.GetFrom(aggregateId, 0, int.MaxValue).ToList();
+            }
+
+            foreach (var c in commits)
+            {
+                obj.LoadsFromHistory(c.Events);
+            }
+
+            return obj;
         }
     }
 }
