@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using BankAccount.DbModel.ItemDb;
-using BankAccount.ValueTypes;
 using BankAccount.ViewModels;
 using EventStore;
 
@@ -23,20 +22,20 @@ namespace BankAccount.QueryStackDal
 
             return new DetailsBankAccountViewModel
             {
-                AggregateId = aggregateId,
-                Version = obj.Version,
-                LastName = obj.Person.LastName,
-                FirstName = obj.Person.FirstName,
-                IdCard = obj.Person.IdCard,
-                IdNumber = obj.Person.IdNumber,
-                Dob = obj.Person.Dob,
-                Phone = obj.Contact.PhoneNumber,
-                Email = obj.Contact.Email,
-                Street = obj.Address.Street,
-                Hausnumber = obj.Address.Hausnumber,
-                Zip = obj.Address.Zip,
-                State = obj.Address.State,
-                City = obj.Address.City
+                AggregateId         = aggregateId,
+                Version             = obj.Version,
+                LastName            = obj.Person.LastName,
+                FirstName           = obj.Person.FirstName,
+                IdCard              = obj.Person.IdCard,
+                IdNumber            = obj.Person.IdNumber,
+                Dob                 = obj.Person.Dob,
+                Phone               = obj.Contact.PhoneNumber,
+                Email               = obj.Contact.Email,
+                Street              = obj.Address.Street,
+                Hausnumber          = obj.Address.Hausnumber,
+                Zip                 = obj.Address.Zip,
+                State               = obj.Address.State,
+                City                = obj.Address.City
             };
         }
 
@@ -51,10 +50,10 @@ namespace BankAccount.QueryStackDal
                     list.Add(
                         new AccountViewModel
                         {
-                            Currency = a.Currency,
-                            CustomerId = a.CustomerAggregateId,
-                            AggregateId = a.AggregateId,
-                            AccountState = a.AccountState
+                            Currency        = a.Currency,
+                            CustomerId      = a.CustomerAggregateId,
+                            AggregateId     = a.AggregateId,
+                            AccountState    = a.AccountState
                         });
                 }
                 return list;
@@ -73,9 +72,9 @@ namespace BankAccount.QueryStackDal
 
                 return new TransferViewModel
                 {
-                    AggregateId = model.AggregateId,
-                    CustomerId = model.CustomerAggregateId,
-                    Version = model.Version
+                    AggregateId     = model.AggregateId,
+                    CustomerId      = model.CustomerAggregateId,
+                    Version         = model.Version
                 };
             }
         }
@@ -94,9 +93,9 @@ namespace BankAccount.QueryStackDal
                 .Select(customer =>
                     new BankAccountViewModel
                     {
-                        FirstName = customer.Person.FirstName,
-                        LastName = customer.Person.LastName,
-                        Id = customer.Id
+                        FirstName   = customer.Person.FirstName,
+                        LastName    = customer.Person.LastName,
+                        Id          = customer.Id
                     })
                 .ToList();
         }
@@ -104,18 +103,16 @@ namespace BankAccount.QueryStackDal
         private Domain.CustomerDomainModel RehydrateDomainModel(Guid aggregateId)
         {
             var obj = new Domain.CustomerDomainModel();
-            IEnumerable<Commit> commits;
+            int version = 0;
 
             var latestSnapshot = this._eventStore.Advanced.GetSnapshot(aggregateId, int.MaxValue);
             if (latestSnapshot?.Payload != null)
             {
                 obj = (Domain.CustomerDomainModel)Convert.ChangeType(latestSnapshot.Payload, latestSnapshot.Payload.GetType());
-                commits = this._eventStore.Advanced.GetFrom(aggregateId, latestSnapshot.StreamRevision + 1, int.MaxValue).ToList();
+                version = latestSnapshot.StreamRevision + 1;
             }
-            else
-            {
-                commits = this._eventStore.Advanced.GetFrom(aggregateId, 0, int.MaxValue).ToList();
-            }
+
+            IEnumerable<Commit>  commits = this._eventStore.Advanced.GetFrom(aggregateId, 0, int.MaxValue).ToList();
 
             foreach (var c in commits)
             {

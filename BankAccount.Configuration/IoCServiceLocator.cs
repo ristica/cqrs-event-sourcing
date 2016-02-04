@@ -6,7 +6,6 @@ using BankAccount.EventHandlers;
 using BankAccount.EventStore;
 using BankAccount.Infrastructure.Buses;
 using BankAccount.Infrastructure.Storage;
-using BankAccount.ProcessManager;
 using BankAccount.QueryStackDal;
 using EventStore;
 using EventStore.Dispatcher;
@@ -35,7 +34,6 @@ namespace BankAccount.Configuration
                 Bootstrapper.Initialize(Container);
 
                 CommandBus              = _container.Resolve<ICommandBus>();
-                SagaBus                 = _container.Resolve<ISagaBus>();
                 QueryStackRepository    = _container.Resolve<IQueryStackRepository>();
 
                 IsInitialized           = true;
@@ -48,7 +46,6 @@ namespace BankAccount.Configuration
 
         public static IUnityContainer Container => _container;
         public static ICommandBus CommandBus { get; }
-        public static ISagaBus SagaBus { get; }
         public static IQueryStackRepository QueryStackRepository { get; }
 
         #endregion
@@ -60,7 +57,6 @@ namespace BankAccount.Configuration
         {
             container.RegisterType <ICommandBus, CommandBus> ();
             container.RegisterType <IEventBus, EventBus> ();
-            container.RegisterType <ISagaBus, SagaBus>();
 
             container.RegisterType <IQueryStackRepository, QueryStackRepository> ();
             container.RegisterType(typeof(ICommandStackRepository<>), typeof(NEventStoreCommandStackRepository<>));
@@ -73,8 +69,6 @@ namespace BankAccount.Configuration
             // Bus handlers
             RegisterCommandHandlers(container);
             RegisterEventHandlers(container);
-
-            RegisterSagasHandlers(container);
         }
 
         private static void RegisterEventHandlers(IUnityContainer container)
@@ -109,13 +103,6 @@ namespace BankAccount.Configuration
             bus.RegisterHandler<DeleteAccountCommandHandler>();
             bus.RegisterHandler<LockAccountCommandHandler>();
             bus.RegisterHandler<UnlockAccountCommandHandler>();
-        }
-
-        private static void RegisterSagasHandlers(IUnityContainer container)
-        {
-            var bus = container.Resolve<ISagaBus>();
-
-            bus.RegisterSaga<CreateBankAccountSaga>();
         }
 
         private static IStoreEvents CreateEventStore(IDispatchCommits bus)

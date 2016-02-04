@@ -122,7 +122,5 @@ namespace BankAccount.Domain
         }
 
         #endregion
-
-
     }
 }

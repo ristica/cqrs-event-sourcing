@@ -66,7 +66,6 @@
   <ItemGroup>
     <Compile Include="Buses\CommandBus.cs" />
     <Compile Include="Buses\EventBus.cs" />
-    <Compile Include="Buses\SagaBus.cs" />
     <Compile Include="IoCServiceLocator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -93,10 +92,6 @@
     <ProjectReference Include="..\BankAccount.Infrastructure\BankAccount.Infrastructure.csproj">
       <Project>{4631996a-9ef1-481c-8fd8-bb895890973e}</Project>
       <Name>BankAccount.Infrastructure</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BankAccount.ProcessManager\BankAccount.ProcessManager.csproj">
-      <Project>{57ca9fd6-6125-46be-b24c-b036699da122}</Project>
-      <Name>BankAccount.ProcessManager</Name>
     </ProjectReference>
     <ProjectReference Include="..\BankAccount.QueryStackDal\BankAccount.QueryStackDal.csproj">
       <Project>{b6c7c79c-ffff-4f2f-99a2-fcc5960fbc9f}</Project>
