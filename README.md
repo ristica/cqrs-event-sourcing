@@ -1,4 +1,4 @@
-# cqrs with es
+# Cqrs wit Event Sourcing
 
 As event store / snapshoting => NEventStore (in my case I'm using SQL Server as the DB)
 
