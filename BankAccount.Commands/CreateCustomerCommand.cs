@@ -29,32 +29,9 @@ namespace BankAccount.Commands
             string state) 
             : base(aggregateId, version)
         {
-            this.Person = new Person
-            {
-                FirstName       = firstName,
-                LastName        = lastName,
-                IdCard          = idCard,
-                IdNumber        = idNumber,
-                Dob             = dob
-            };
-            this.Contact = new Contact
-            {
-                Email           = email,
-                PhoneNumber     = phone
-            };
-            //this.Money = new Money
-            //{
-            //    Balance         = 0,
-            //    Currency        = currency
-            //};
-            this.Address = new Address
-            {
-                State           = state,
-                Hausnumber      = hausnumber,
-                City            = city,
-                Zip             = zip,
-                Street          = street
-            };
+            this.Person = new Person(firstName, lastName, dob, idCard, idNumber);
+            this.Contact = new Contact(email, phone);
+            this.Address = new Address(street, zip, hausnumber, city, state);
         }
     }
 }
