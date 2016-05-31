@@ -56,7 +56,6 @@ namespace BankAccount.Configuration
         public static void Initialize(IUnityContainer container)
         {
             container.RegisterType <ICommandBus, CommandBus> ();
-            container.RegisterType <IEventBus, EventBus> ();
 
             container.RegisterType <IQueryStackRepository, QueryStackRepository> ();
             container.RegisterType(typeof(ICommandStackRepository<>), typeof(NEventStoreCommandStackRepository<>));
@@ -68,24 +67,6 @@ namespace BankAccount.Configuration
 
             // Bus handlers
             RegisterCommandHandlers(container);
-            RegisterEventHandlers(container);
-        }
-
-        private static void RegisterEventHandlers(IUnityContainer container)
-        {
-            var bus = container.Resolve<IEventBus>();
-            
-            bus.RegisterHandler<CustomerCreatedEventHandler>();
-            bus.RegisterHandler<CustomerDeletedEventHandler>();
-            bus.RegisterHandler<PersonChangedEventHandler>();
-            bus.RegisterHandler<ContactChangedEventHandler>();
-            bus.RegisterHandler<AddressChangedEventHandler>();
-
-            bus.RegisterHandler<AccountAddedEventHandler>();
-            bus.RegisterHandler<BalanceChangedEventHandler>();
-            bus.RegisterHandler<AccountDeletedEventHandler>();
-            bus.RegisterHandler<AccountLockedEventHandler>();
-            bus.RegisterHandler<AccountUnlockedEventHandler>();
         }
 
         private static void RegisterCommandHandlers(IUnityContainer container)

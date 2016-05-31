@@ -1,9 +1,15 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using BankAccount.Infrastructure;
 using BankAccount.Infrastructure.Buses;
 using EventStore;
 using EventStore.Dispatcher;
+using Newtonsoft.Json;
+using msmq = System.Messaging;
 
 namespace BankAccount.EventStore
 {
@@ -11,16 +17,9 @@ namespace BankAccount.EventStore
     {
         #region Fields
 
-        private readonly IEventBus _eventBus;
-
         #endregion
 
         #region C-Tor
-
-        public CommitsDispatcher(IEventBus eventBus)
-        {
-            _eventBus = eventBus;
-        }
 
         #endregion
 
@@ -30,10 +29,29 @@ namespace BankAccount.EventStore
         {
             try
             {
-                foreach (var ev in commit.Events.Select(@event => Converter.ChangeTo(@event.Body, @event.Body.GetType())))
+                Task.Run(() =>
                 {
-                    this._eventBus.Publish(ev);
-                }
+                    foreach (var ev in commit.Events.Select(@event => Converter.ChangeTo(@event.Body, @event.Body.GetType())))
+                    {
+                        try
+                        {
+                            using (var queue = new msmq.MessageQueue(".\\private$\\bankaccount-tx"))
+                            {
+                                var message = new msmq.Message();
+                                var jsonBody = JsonConvert.SerializeObject(ev);
+                                message.BodyStream = new MemoryStream(Encoding.Default.GetBytes(jsonBody));
+                                var tx = new msmq.MessageQueueTransaction();
+                                tx.Begin();
+                                queue.Send(message, tx);
+                                tx.Commit();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debugger.Break();
+                        }
+                    }
+                });
             }
             catch (Exception ex)
             {

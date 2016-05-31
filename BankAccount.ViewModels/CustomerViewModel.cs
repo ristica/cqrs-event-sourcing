@@ -13,31 +13,31 @@ namespace BankAccount.ViewModels
         [Display(Name = "Last name")]
         public string LastName { get; set; }
 
-        [Required]
+        //[Required]
         [Display(Name = "ID Card")]
         public string IdCard { get; set; }
 
-        [Required]
+        //[Required]
         [Display(Name = "ID Card's number")]
         public string IdNumber { get; set; }
 
-        [Required]
+        //[Required]
         [DataType(DataType.Date)]
         [Display(Name = "Date of birth")]
         public DateTime Dob { get; set; }
 
-        [Required]
+        //[Required]
         [DataType(DataType.EmailAddress)]
         [Display(Name = "E-Mail address")]
         public string Email { get; set; }
 
         public string Phone { get; set; }
 
-        [Required]
+        //[Required]
         [MaxLength(20)]
         public string Street { get; set; }
 
-        [Required]
+        //[Required]
         [MaxLength(4)]
         [MinLength(4)]
         public string ZIP { get; set; }
@@ -46,11 +46,11 @@ namespace BankAccount.ViewModels
         [MaxLength(10)]
         public string Hausnumber { get; set; }
 
-        [Required]
+        //[Required]
         [MaxLength(50)]
         public string City { get; set; }
 
-        [Required]
+        //[Required]
         [MaxLength(50)]
         public string State { get; set; }
     }
